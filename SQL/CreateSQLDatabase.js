@@ -58,3 +58,19 @@ export const deleteWorkoutsTable = async (db: SQLite.WebSQLDatabase): boolean =>
         );
     });
 }
+
+export const deleteRowByID = async (db: SQLite.WebSQLDatabase, id: number): boolean => {
+    db.transaction((tx) => {
+        tx.executeSql(
+            `DELETE FROM workouts WHERE id = ?;`,
+            [id],
+            (_, result) => {
+                console.log(`Deleted row with id: ${id}`)
+                return true
+            },
+            (error) => {
+                console.log(`Error deleting row: ${error}`);
+            },
+        );
+    });
+}

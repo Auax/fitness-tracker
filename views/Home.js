@@ -1,48 +1,41 @@
 import React from 'react';
-import {StyleSheet, Text, View, Image, TouchableOpacity, FlatList} from 'react-native';
-import WorkoutListElement from "../components/WorkoutListElement";
-import Icon from 'react-native-vector-icons/Entypo';
+import {StyleSheet, View, TouchableOpacity, SafeAreaView} from 'react-native';
+import {Button, Heading, Icon, Box, FlatList, Text, Image} from 'native-base';
+import {Entypo} from '@expo/vector-icons';
 import {useNavigation} from "@react-navigation/native";
-import {GlobalStyles} from "../components/Styles";
+
+import WorkoutListElement from "../components/WorkoutListElement";
+import BottomBar from "../components/BottomBar";
+import {deleteRowByID} from "../SQL/CreateSQLDatabase";
 
 const Home = (props) => {
     const navigation = useNavigation();
 
-    const handleDelete = (key) => {
-        console.log("Delete");
+    const handleDelete = (id) => {
+        deleteRowByID(props.db, id);
+        props.triggerUpdate();
     };
 
-    // To render when there is no workout data
-    const noWorkoutsRender = (
-        <View style={styles.noWorkoutContainer}>
-            <Image source={require('../assets/icon.png')} style={styles.logo}/>
-            <Text style={GlobalStyles.title}>Fitness Tracker</Text>
-            <TouchableOpacity style={GlobalStyles.button} onPress={() => navigation.navigate("NewWorkout")}>
-                <Text style={GlobalStyles.buttonText}>New Workout</Text>
-            </TouchableOpacity>
-        </View>
-
+    return (
+        <SafeAreaView flex={1} style={{backgroundColor: "white"}}>
+            <Box style={styles.workoutContainer}>
+                <Heading textAlign="center">Your workouts</Heading>
+                {props.workouts.length > 0 ?
+                    <FlatList
+                        mt={5}
+                        data={props.workouts}
+                        renderItem={({item}) => <WorkoutListElement key={item.id} name={item.name}
+                                                                    onDeleteItem={() => handleDelete(item.id)}/>}
+                        keyExtractor={(item) => item.key}
+                    /> :
+                    <Box flex={1} display="flex" style={{justifyContent: "center"}}>
+                        <Text fontSize="md" color="#454545" textAlign="center">Nothing here!</Text>
+                    </Box>
+                }
+            </Box>
+            <BottomBar/>
+        </SafeAreaView>
     );
-
-    // After creating a single workout instance
-    const workoutsRender = (
-        <View style={styles.workoutContainer}>
-            <View style={styles.titleContainer}>
-                <Text style={GlobalStyles.title}>Your workouts</Text>
-                <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate("NewWorkout")}>
-                    <Icon name="plus" size={24}/>
-                </TouchableOpacity>
-            </View>
-
-            <FlatList
-                data={props.workouts}
-                renderItem={({item}) => <WorkoutListElement key={item.name} name={item.name}/>}
-                keyExtractor={(item) => item.key}
-            />
-        </View>
-    );
-
-    return props.workouts.length > 0 ? workoutsRender : noWorkoutsRender;
 };
 
 export default Home;
@@ -58,12 +51,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#fff",
         paddingHorizontal: 20,
-        paddingVertical: 50,
-    },
-    titleContainer: {
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "space-between"
+        paddingTop: 30,
     },
     logo: {
         width: 150,

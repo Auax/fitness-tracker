@@ -1,12 +1,13 @@
 import React, {useState} from 'react';
-import {View, Text, TextInput, TouchableOpacity} from 'react-native';
-import Check from "../components/Check";
+import {View} from 'react-native';
+import {Button, Heading, useToast, Text, Input, Checkbox, Box} from 'native-base';
 import {createWorkout, fetchWorkouts} from "../SQL/CreateSQLDatabase";
 import {useNavigation} from "@react-navigation/native";
 import {GlobalStyles} from "../components/Styles";
 
 function NewWorkout(props) {
     const navigation = useNavigation();
+    const toast = useToast();
 
     const [workoutName, setWorkoutName] = useState('');
     const [muscleGroups, setMuscleGroups] = useState([
@@ -25,6 +26,16 @@ function NewWorkout(props) {
     };
 
     const handleSaveWorkout = () => {
+        if (workoutName.length <= 0) {
+            toast.show({
+                render: () => {
+                    return <Box bg="red.100" px="3" py="2" rounded="sm" mb={5}>
+                        Please enter a name!
+                    </Box>;
+                }
+            });
+            return;
+        }
         createWorkout(props.db, workoutName, "2023-04-02", "18:00");
         fetchWorkouts(props.db).catch(console.error);
         props.triggerUpdate();
@@ -33,27 +44,27 @@ function NewWorkout(props) {
 
     return (
         <View style={GlobalStyles.container}>
-            <Text style={GlobalStyles.title}>Create a new workout</Text>
-            <TextInput
-                style={GlobalStyles.input}
+            <Heading>Create a new workout</Heading>
+            <Input
+                variant="default"
+                size="md"
+                my={3}
                 placeholder="Workout name"
                 onChangeText={(text) => setWorkoutName(text)}
                 value={workoutName}
             />
 
-            <Text style={GlobalStyles.subtitle}>Select body parts:</Text>
+            <Heading size="md">Select body parts:</Heading>
             {muscleGroups.map((muscleGroup, index) => (
-                <Check
-                    key={muscleGroup.name}
-                    text={muscleGroup.name}
-                    isChecked={muscleGroup.isChecked}
-                    setChecked={() => handleCheckChange(index)}
-                />
+                <Checkbox isChecked={muscleGroup.isChecked} onChange={() => handleCheckChange(index)}
+                          colorScheme="dark" my={1} size="sm">
+                    {muscleGroup.name}
+                </Checkbox>
             ))}
 
-            <TouchableOpacity style={GlobalStyles.button} onPress={handleSaveWorkout}>
-                <Text style={GlobalStyles.buttonText}>Create</Text>
-            </TouchableOpacity>
+            <Button variant="default" mt={3} onPress={handleSaveWorkout}>
+                <Text color="white" fontWeight="semibold">Create</Text>
+            </Button>
 
         </View>
     );

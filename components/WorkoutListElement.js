@@ -1,14 +1,36 @@
 import React, {useState} from 'react';
-import {StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
-import Icon from 'react-native-vector-icons/AntDesign';
+import {StyleSheet, View, TouchableOpacity} from 'react-native';
+import {Button, Heading, Icon, Box, FlatList, Text, Image} from 'native-base';
+import {AntDesign} from '@expo/vector-icons';
 import {useNavigation} from "@react-navigation/native";
+import {useActionSheet} from "@expo/react-native-action-sheet";
 
 const WorkoutListElement = (props) => {
-    const navigation = useNavigation()
+    const navigation = useNavigation();
+    const {showActionSheetWithOptions} = useActionSheet();
+
     const [longPressed, setLongPressed] = useState(false);
 
-    const handleLongPress = () => {
 
+    const handleLongPress = () => {
+        const options = ['Delete', 'Cancel'];
+        const destructiveButtonIndex = 0;
+        const cancelButtonIndex = 2;
+
+        showActionSheetWithOptions({
+            options,
+            cancelButtonIndex,
+            destructiveButtonIndex
+        }, (selectedIndex: number) => {
+            switch (selectedIndex) {
+                case destructiveButtonIndex:
+                    props.onDeleteItem();
+                    break;
+
+                case cancelButtonIndex:
+                // Canceled
+            }
+        });
     }
 
     return (
@@ -16,8 +38,8 @@ const WorkoutListElement = (props) => {
                           onPress={() => navigation.navigate("WorkoutDetails")}
                           onLongPress={handleLongPress}
         >
-            <Text style={styles.workoutText}>{props.name}</Text>
-            <Icon name="right" size={15}/>
+            <Text fontWeight="semibold">{props.name}</Text>
+            <Icon as={AntDesign} name="right" size={15}/>
         </TouchableOpacity>
     )
 };
@@ -34,8 +56,5 @@ const styles = StyleSheet.create({
         padding: 17,
         marginVertical: 5,
         borderRadius: 6
-    },
-    workoutText: {
-        fontWeight: 500
     }
 });
