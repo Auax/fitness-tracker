@@ -1,6 +1,6 @@
-import React, {useState} from 'react';
-import {StyleSheet, View, TouchableOpacity} from 'react-native';
-import {Button, Heading, Icon, Box, FlatList, Text, Image} from 'native-base';
+import React from 'react';
+import {StyleSheet, TouchableOpacity} from 'react-native';
+import {Icon, Text} from 'native-base';
 import {AntDesign} from '@expo/vector-icons';
 import {useNavigation} from "@react-navigation/native";
 import {useActionSheet} from "@expo/react-native-action-sheet";
@@ -8,9 +8,6 @@ import {useActionSheet} from "@expo/react-native-action-sheet";
 const WorkoutListElement = (props) => {
     const navigation = useNavigation();
     const {showActionSheetWithOptions} = useActionSheet();
-
-    const [longPressed, setLongPressed] = useState(false);
-
 
     const handleLongPress = () => {
         const options = ['Delete', 'Cancel'];
@@ -35,10 +32,13 @@ const WorkoutListElement = (props) => {
 
     return (
         <TouchableOpacity style={styles.workout}
-                          onPress={() => navigation.navigate("WorkoutDetails")}
-                          onLongPress={handleLongPress}
-        >
-            <Text fontWeight="semibold">{props.name}</Text>
+                          key={props.key}
+                          onPress={() => navigation.navigate("WorkoutDetails", {
+                              title: props.item.name,
+                              workout: props.item
+                          })}
+                          onLongPress={handleLongPress}>
+            <Text fontWeight="semibold">{props.item.name}</Text>
             <Icon as={AntDesign} name="right" size={15}/>
         </TouchableOpacity>
     )

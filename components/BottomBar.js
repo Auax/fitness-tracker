@@ -1,6 +1,5 @@
-import React, {useState} from 'react';
-import {StyleSheet, View} from 'react-native';
-import {Button, Heading, useToast, Text, Input, Checkbox, Box, Icon} from 'native-base';
+import {StyleSheet} from 'react-native';
+import {Button, Box, Icon} from 'native-base';
 import {Entypo, Feather} from '@expo/vector-icons';
 import {useNavigation} from "@react-navigation/native";
 

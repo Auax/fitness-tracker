@@ -2,85 +2,42 @@ import React, {useState} from 'react';
 import {StyleSheet, Text, View, FlatList, TouchableOpacity} from 'react-native';
 import {GlobalStyles} from "../components/Styles";
 
-const DATA = [
-    {
-        id: '1',
-        workoutName: 'Upper Body',
-        exercises: [
-            {
-                id: '1',
-                name: 'Bench Press',
-                weight: '135 lbs',
-                reps: '10 reps',
-            },
-            {
-                id: '2',
-                name: 'Shoulder Press',
-                weight: '95 lbs',
-                reps: '8 reps',
-            },
-            {
-                id: '3',
-                name: 'Pull-ups',
-                weight: 'Bodyweight',
-                reps: '10 reps',
-            },
-        ],
-    },
-    {
-        id: '2',
-        workoutName: 'Lower Body',
-        exercises: [
-            {
-                id: '1',
-                name: 'Squats',
-                weight: '185 lbs',
-                reps: '10 reps',
-            },
-            {
-                id: '2',
-                name: 'Deadlifts',
-                weight: '225 lbs',
-                reps: '8 reps',
-            },
-            {
-                id: '3',
-                name: 'Leg Press',
-                weight: '270 lbs',
-                reps: '12 reps',
-            },
-        ],
-    },
-];
 
-const WorkoutView = () => {
-    const [workouts, setWorkouts] = useState(DATA);
+const WorkoutView = ({route}) => {
+    // Set workout data
+    const fetchedWorkout = route.params.workout;
+    // Convert to array of objects [{},{},...]
+    const muscleGroupsArr = Object.entries(fetchedWorkout["muscleGroups"]).map(([name]) => ({[name]: []}));
 
-    const addWorkout = () => {
+    const [workout, setWorkout] = useState(muscleGroupsArr);
+
+    // Create a new muscle group and commit to db
+    const addMuscleGroup = () => {
         const newWorkout = {
-            id: `${workouts.length + 1}`,
+            id: `${workout.length + 1}`,
             workoutName: 'New Workout',
             exercises: [],
         };
-        setWorkouts([...workouts, newWorkout]);
+        setWorkout([...workout, newWorkout]);
     };
 
+    // Add a new exercise and commit to db
     const addExercise = (workoutIndex) => {
         const newExercise = {
-            id: `${workouts[workoutIndex].exercises.length + 1}`,
+            id: `${workout[workoutIndex].exercises.length + 1}`,
             name: 'New Exercise',
             weight: '',
             reps: '',
         };
-        const updatedWorkouts = [...workouts];
+        const updatedWorkouts = [...workout];
         updatedWorkouts[workoutIndex].exercises = [...updatedWorkouts[workoutIndex].exercises, newExercise];
-        setWorkouts(updatedWorkouts);
+        setWorkout(updatedWorkouts);
     };
 
     const renderItem = ({item, index}) => (
         <View style={styles.workoutContainer}>
             <View style={styles.workoutHeader}>
-                <Text style={styles.workoutTitle}>{item.workoutName}</Text>
+                <Text style={styles.workoutTitle}>{Object.entries(item)}</Text>
             </View>
             <FlatList
                 data={item.exercises}
@@ -102,11 +59,11 @@ const WorkoutView = () => {
     return (
         <View style={GlobalStyles.container}>
             <Text style={styles.heading}>Workout View</Text>
-            <TouchableOpacity style={styles.addButton} onPress={addWorkout}>
+            <TouchableOpacity style={styles.addButton} onPress={addMuscleGroup}>
                 <Text style={styles.addButtonText}>Add Body Part</Text>
             </TouchableOpacity>
             <FlatList
-                data={workouts}
+                data={workout}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id}
             />

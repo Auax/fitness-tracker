@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {View} from 'react-native';
 import {Button, Heading, useToast, Text, Input, Checkbox, Box} from 'native-base';
-import {createWorkout, fetchWorkouts} from "../SQL/CreateSQLDatabase";
+import {createWorkout} from "../SQL/CreateSQLDatabase";
 import {useNavigation} from "@react-navigation/native";
 import {GlobalStyles} from "../components/Styles";
 
@@ -19,6 +19,17 @@ function NewWorkout(props) {
         {name: 'Abdominal', isChecked: false}
     ]);
 
+    const showErrorToast = (msg: string) => {
+        toast.show({
+            placement: "top",
+            render: () => {
+                return <Box bg="red.100" px="3" py="2" rounded="sm" mb={5}>
+                    {msg}
+                </Box>;
+            }
+        });
+    }
+
     const handleCheckChange = (index) => {
         const updatedMuscleGroups = [...muscleGroups];
         updatedMuscleGroups[index].isChecked = !updatedMuscleGroups[index].isChecked;
@@ -26,18 +37,18 @@ function NewWorkout(props) {
     };
 
     const handleSaveWorkout = () => {
+        // Show error to user if no name is specified
         if (workoutName.length <= 0) {
-            toast.show({
-                render: () => {
-                    return <Box bg="red.100" px="3" py="2" rounded="sm" mb={5}>
-                        Please enter a name!
-                    </Box>;
-                }
-            });
+            showErrorToast("Please enter a name!");
             return;
         }
-        createWorkout(props.db, workoutName, "2023-04-02", "18:00");
-        fetchWorkouts(props.db).catch(console.error);
+
+        const muscleGroupNames = muscleGroups
+            .filter(item => item.isChecked)
+            .map(item => item.name);
+
+        createWorkout(props.db, workoutName, "2023-04-02", JSON.stringify(muscleGroupNames))
+            .catch(() => showErrorToast("Something went wrong while creating the new workout!"));
         props.triggerUpdate();
         navigation.navigate("Workouts");
     }
@@ -56,7 +67,7 @@ function NewWorkout(props) {
 
             <Heading size="md">Select body parts:</Heading>
             {muscleGroups.map((muscleGroup, index) => (
-                <Checkbox isChecked={muscleGroup.isChecked} onChange={() => handleCheckChange(index)}
+                <Checkbox key={index} isChecked={muscleGroup.isChecked} onChange={() => handleCheckChange(index)}
                           colorScheme="dark" my={1} size="sm">
                     {muscleGroup.name}
                 </Checkbox>

@@ -1,7 +1,6 @@
 import React from 'react';
-import {StyleSheet, View, TouchableOpacity, SafeAreaView} from 'react-native';
-import {Button, Heading, Icon, Box, FlatList, Text, Image} from 'native-base';
-import {Entypo} from '@expo/vector-icons';
+import {StyleSheet, SafeAreaView} from 'react-native';
+import {Heading, Box, FlatList, Text} from 'native-base';
 import {useNavigation} from "@react-navigation/native";
 
 import WorkoutListElement from "../components/WorkoutListElement";
@@ -24,8 +23,9 @@ const Home = (props) => {
                     <FlatList
                         mt={5}
                         data={props.workouts}
-                        renderItem={({item}) => <WorkoutListElement key={item.id} name={item.name}
-                                                                    onDeleteItem={() => handleDelete(item.id)}/>}
+                        renderItem={({item}) =>
+                            <WorkoutListElement key={item.id} item={item}
+                                                onDeleteItem={() => handleDelete(item.id)}/>}
                         keyExtractor={(item) => item.key}
                     /> :
                     <Box flex={1} display="flex" style={{justifyContent: "center"}}>

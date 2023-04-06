@@ -8,7 +8,6 @@ import * as SQLite from "expo-sqlite";
 import {deleteWorkoutsTable, fetchWorkouts} from "./SQL/CreateSQLDatabase";
 import WorkoutDetail from "./views/WorkoutDetail";
 import {NativeBaseProvider} from "native-base/src/core/NativeBaseProvider";
-import {extendTheme} from "native-base";
 import {theme} from "./NativeBaseTheme";
 
 export default function HomeScreen() {
@@ -20,30 +19,31 @@ export default function HomeScreen() {
     // Fetch workouts
     const updateDatabase = () => {
         fetchWorkouts(db).then((rows) => {
-            setWorkoutRows(rows._array);
+            setWorkoutRows(rows);
         }).catch((error) => {
             console.log(error);
         });
     }
 
     useEffect(updateDatabase, []);
+
     return (
         <ActionSheetProvider>
             <NativeBaseProvider theme={theme}>
                 <NavigationContainer>
                     <Stack.Navigator>
-                        <Stack.Screen name="Workouts" options={{headerShown: false}}>{() =>
-                            <Home db={db} workouts={workoutRows} triggerUpdate={updateDatabase}/>}
+                        <Stack.Screen name="Workouts" options={{headerShown: false}}>{() => <Home db={db}
+                                                                                                  workouts={workoutRows}
+                                                                                                  triggerUpdate={updateDatabase}/>}
                         </Stack.Screen>
-
                         <Stack.Screen name="NewWorkout" options={{title: 'New Workout'}}>
                             {() => <NewWorkout db={db} triggerUpdate={updateDatabase}/>}
                         </Stack.Screen>
-
-                        <Stack.Screen name="WorkoutDetails" options={{title: 'Details'}}>
-                            {() => <WorkoutDetail/>}
-                        </Stack.Screen>
-
+                        <Stack.Screen name="WorkoutDetails"
+                                      options={({route}) => ({
+                                          title: route.params.title, workout: route.params.workout
+                                      })}
+                                      component={WorkoutDetail}/>
                     </Stack.Navigator>
                 </NavigationContainer>
             </NativeBaseProvider>
