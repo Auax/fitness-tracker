@@ -18,9 +18,11 @@ export default function HomeScreen() {
 
     // Fetch workouts
     const updateDatabase = () => {
+        // deleteWorkoutsTable(db);
         fetchWorkouts(db).then((rows) => {
             setWorkoutRows(rows);
         }).catch((error) => {
+            setWorkoutRows([])
             console.log(error);
         });
     }
@@ -32,16 +34,17 @@ export default function HomeScreen() {
             <NativeBaseProvider theme={theme}>
                 <NavigationContainer>
                     <Stack.Navigator>
-                        <Stack.Screen name="Workouts" options={{headerShown: false}}>{() => <Home db={db}
-                                                                                                  workouts={workoutRows}
-                                                                                                  triggerUpdate={updateDatabase}/>}
+                        <Stack.Screen name="Workouts" options={{headerShown: false}}>
+                            {() => <Home db={db} workouts={workoutRows} triggerUpdate={updateDatabase}/>}
                         </Stack.Screen>
                         <Stack.Screen name="NewWorkout" options={{title: 'New Workout'}}>
                             {() => <NewWorkout db={db} triggerUpdate={updateDatabase}/>}
                         </Stack.Screen>
                         <Stack.Screen name="WorkoutDetails"
                                       options={({route}) => ({
-                                          title: route.params.title, workout: route.params.workout
+                                          title: route.params.title,
+                                          headerShown: false,
+                                          workout: route.params.workout
                                       })}
                                       component={WorkoutDetail}/>
                     </Stack.Navigator>

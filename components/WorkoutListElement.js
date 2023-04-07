@@ -32,7 +32,6 @@ const WorkoutListElement = (props) => {
 
     return (
         <TouchableOpacity style={styles.workout}
-                          key={props.key}
                           onPress={() => navigation.navigate("WorkoutDetails", {
                               title: props.item.name,
                               workout: props.item

@@ -38,6 +38,7 @@ export const fetchWorkouts = async (db: SQLite.WebSQLDatabase): Promise<SQLResul
             tx.executeSql('SELECT * FROM workouts', [], (tx, results) => {
                 resolve(results.rows._array.map(row => {
                     row["muscleGroups"] = JSON.parse(row["muscleGroups"]);
+                    console.log(row);
                     return row;
                 }));
             });

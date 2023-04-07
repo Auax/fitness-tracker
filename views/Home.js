@@ -8,8 +8,7 @@ import BottomBar from "../components/BottomBar";
 import {deleteRowByID} from "../SQL/CreateSQLDatabase";
 
 const Home = (props) => {
-    const navigation = useNavigation();
-
+    useNavigation();
     const handleDelete = (id) => {
         deleteRowByID(props.db, id);
         props.triggerUpdate();
@@ -26,8 +25,8 @@ const Home = (props) => {
                         renderItem={({item}) =>
                             <WorkoutListElement key={item.id} item={item}
                                                 onDeleteItem={() => handleDelete(item.id)}/>}
-                        keyExtractor={(item) => item.key}
-                    /> :
+                        keyExtractor={(item) => item.id}/>
+                    :
                     <Box flex={1} display="flex" style={{justifyContent: "center"}}>
                         <Text fontSize="md" color="#454545" textAlign="center">Nothing here!</Text>
                     </Box>

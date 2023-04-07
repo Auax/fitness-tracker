@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {View} from 'react-native';
-import {Button, Heading, useToast, Text, Input, Checkbox, Box} from 'native-base';
+import {Box, Button, Checkbox, Heading, Input, Text, useToast} from 'native-base';
 import {createWorkout} from "../SQL/CreateSQLDatabase";
 import {useNavigation} from "@react-navigation/native";
 import {GlobalStyles} from "../components/Styles";
@@ -45,7 +45,12 @@ function NewWorkout(props) {
 
         const muscleGroupNames = muscleGroups
             .filter(item => item.isChecked)
-            .map(item => item.name);
+            .map(item => {
+                return {
+                    name: item.name,
+                    exercises: []
+                };
+            });
 
         createWorkout(props.db, workoutName, "2023-04-02", JSON.stringify(muscleGroupNames))
             .catch(() => showErrorToast("Something went wrong while creating the new workout!"));

@@ -1,15 +1,22 @@
-import React, {useState} from 'react';
-import {StyleSheet, Text, View, FlatList, TouchableOpacity} from 'react-native';
-import {GlobalStyles} from "../components/Styles";
+import React, {useEffect, useState} from 'react';
+import {StyleSheet, View, FlatList, TouchableOpacity, SafeAreaView} from 'react-native';
+import Navbar from "../components/Navbar";
+import {Heading, Icon} from "native-base";
+import {Feather} from '@expo/vector-icons';
+import {Box, Text} from "native-base";
 
 
 const WorkoutView = ({route}) => {
-    // Set workout data
-    const fetchedWorkout = route.params.workout;
-    // Convert to array of objects [{},{},...]
-    const muscleGroupsArr = Object.entries(fetchedWorkout["muscleGroups"]).map(([name]) => ({[name]: []}));
+    const [editMode, setEditMode] = useState(false);
+    const [workout, setWorkout] = useState([]);
 
-    const [workout, setWorkout] = useState(muscleGroupsArr);
+    useEffect(() => {
+        // Set workout data
+        const fetchedWorkout = route.params.workout;
+        // Convert to array of objects [{},{},...]
+        const muscleGroupsArr = fetchedWorkout["muscleGroups"];
+        setWorkout(muscleGroupsArr);
+    }, []);
 
     // Create a new muscle group and commit to db
     const addMuscleGroup = () => {
@@ -26,59 +33,76 @@ const WorkoutView = ({route}) => {
         const newExercise = {
             id: `${workout[workoutIndex].exercises.length + 1}`,
             name: 'New Exercise',
-            weight: '',
-            reps: '',
+            weight: '10',
+            reps: '20',
         };
         const updatedWorkouts = [...workout];
         updatedWorkouts[workoutIndex].exercises = [...updatedWorkouts[workoutIndex].exercises, newExercise];
         setWorkout(updatedWorkouts);
     };
 
-    const renderItem = ({item, index}) => (
-        <View style={styles.workoutContainer}>
-            <View style={styles.workoutHeader}>
-                <Text style={styles.workoutTitle}>{Object.entries(item)}</Text>
-            </View>
-            <FlatList
-                data={item.exercises}
-                renderItem={({item}) => (
-                    <View style={styles.card}>
-                        <Text style={styles.cardTitle}>{item.name}</Text>
-                        <Text style={styles.cardText}>{item.weight}</Text>
-                        <Text style={styles.cardText}>{item.reps}</Text>
-                    </View>
-                )}
-                keyExtractor={(item) => item.id}
-            />
-            <TouchableOpacity style={styles.addButton} onPress={() => addExercise(index)}>
-                <Text style={styles.addButtonText}>Add</Text>
-            </TouchableOpacity>
-        </View>
+    const customBtn = (
+        <Box style={styles.editBtn}>
+            <Icon as={Feather} name="edit-2" size={6} color={editMode ? "blue.500" : "#000"}/>
+        </Box>
     );
 
+    const renderItem = ({item, index}) => {
+        return (
+            <View style={styles.workoutContainer}>
+                <Heading fontSize={20} mb={2}>{item.name}</Heading>
+                <FlatList
+                    data={item.exercises}
+                    renderItem={({item}) => (
+                        <View style={styles.card}>
+                            <Box display="flex" flexDirection="row" gap={2} alignItems="center">
+                                <Text style={styles.exerciseTextInfo}>{item.weight} kg</Text>
+                                <Text fontSize={15} color="#6e6e6e">x</Text>
+                                <Text style={styles.exerciseTextInfo}>{item.reps} reps</Text>
+                            </Box>
+                            <Text style={styles.cardTitle}>{item.name}</Text>
+                        </View>
+                    )}
+                    keyExtractor={(item) => item.id}
+                />
+                {editMode &&
+                    <TouchableOpacity style={styles.addButton} onPress={() => addExercise(index)}>
+                        <Text style={styles.addButtonText}>Add</Text>
+                    </TouchableOpacity>}
+            </View>
+        )
+    };
+
     return (
-        <View style={GlobalStyles.container}>
-            <Text style={styles.heading}>Workout View</Text>
-            <TouchableOpacity style={styles.addButton} onPress={addMuscleGroup}>
-                <Text style={styles.addButtonText}>Add Body Part</Text>
-            </TouchableOpacity>
-            <FlatList
-                data={workout}
-                renderItem={renderItem}
-                keyExtractor={(item) => item.id}
+        <SafeAreaView flex={1} style={{backgroundColor: "#fff"}}>
+            <Navbar title={route.params.title}
+                customBtn={customBtn}
+                customBtnName="edit-2"
+                customBtnSize={6}
+                customBtnCallback={() => setEditMode(!editMode)}
             />
-        </View>
+            <Box style={styles.container}>
+                <Text style={styles.heading}>Workout View</Text>
+                {editMode && <TouchableOpacity style={styles.addButton} onPress={addMuscleGroup}>
+                    <Text style={styles.addButtonText}>Add Body Part</Text>
+                </TouchableOpacity>}
+                <FlatList
+                    data={workout}
+                    renderItem={renderItem}
+                    keyExtractor={(item) => item.name}
+                />
+            </Box>
+        </SafeAreaView>
+
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
-        alignItems: "center",
-        justifyContent: 'center',
-        padding: 20,
-
+        padding: 30,
+        zIndex: 1,
+        backgroundColor: "#f1f1f1"
     },
     heading: {
         fontSize: 24,
@@ -86,7 +110,6 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     addButton: {
-        // backgroundColor: '#0e0e0e',
         borderColor: "#0773d2",
         borderWidth: 1,
         borderStyle: "solid",
@@ -98,42 +121,44 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontWeight: 'bold',
     },
+    editBtn: {
+        display: "flex",
+        flexDirection: "row",
+        alignContent: "center",
+    },
     workoutContainer: {
-        // backgroundColor: '#f0f0f0',
         borderRadius: 5,
         paddingVertical: 10,
-        // paddingHorizontal: 30,
         marginTop: 10,
-        shadowColor: '#000',
-    },
-    workoutHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-    workoutTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
     },
     card: {
+        display: "flex",
+        flexDirection: "column",
+        gap: 5,
         backgroundColor: '#fff',
         borderRadius: 5,
-        padding: 10,
+        paddingVertical: 20,
+        paddingHorizontal: 25,
         marginBottom: 10,
-        borderColor: "#f0f0f0",
-        borderWidth: 1,
-        borderStyle: "solid",
+        elevation: 5, // This is for Android devices
+        shadowColor: '#000', // This is for iOS devices
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 3.84,
     },
     cardTitle: {
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 5,
     },
-    cardText: {
-        fontSize: 14,
-        marginBottom: 5,
-    },
+    exerciseTextInfo: {
+        fontSize: 15,
+        color: "#6e6e6e",
+        fontWeight: "bold"
+    }
 });
 
 export default WorkoutView;
