@@ -10,7 +10,7 @@ const Navbar = (props) => {
     return (
         <Box style={styles.container}>
             <Box style={[StyleSheet.absoluteFill, styles.header]}>
-                <Heading>
+                <Heading size="md">
                     {props.title}
                 </Heading>
             </Box>
